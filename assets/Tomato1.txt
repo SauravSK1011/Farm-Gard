@@ -1,0 +1,5 @@
+0 Tomato___Bacterial_spot
+1 Tomato___Early_blight
+2 Tomato___healthy
+3 Tomato___Leaf_Mold
+4 Tomato___Septoria_leaf_spot

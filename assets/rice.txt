@@ -1,0 +1,4 @@
+0 Rice___Neck_Blast
+1 Rice___Leaf_Blast
+2 Rice___Healthy
+3 Rice___Brown_Spot

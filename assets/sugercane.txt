@@ -1,0 +1,5 @@
+0 Sugarcane__bacterial_blight
+1 Sugarcane__healthy
+2 Sugarcane__red_rot
+3 Sugarcane__red_stripe
+4 Sugarcane__rust

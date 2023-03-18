@@ -1,0 +1,4 @@
+0 Wheat___Yellow_Rust(Stripe Rust)
+1 Wheat___Healthy
+2 Wheat___Brown_Rust
+3 Wheat_Septoria

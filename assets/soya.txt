@@ -1,0 +1,9 @@
+0 Soybean__bacterial_blight
+1 Soybean__caterpillar
+2 Soybean__diabrotica_speciosa
+3 Soybean__downy_mildew
+4 Soybean__healthy
+5 Soybean__mosaic_virus
+6 Soybean__powdery_mildew
+7 Soybean__rust
+8 Soybean__southern_blight

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "204503361907",
+    "project_id": "agroscan-53d5b",
+    "storage_bucket": "agroscan-53d5b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:204503361907:android:dfd3ec218eedd2f1f63d06",
+        "android_client_info": {
+          "package_name": "com.example.agroscan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "204503361907-hc43d67rec9o4ucjs1lq49gd14nc8ols.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAv3ayttahqZTn1IxnH2oqqA1flJDEltnA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "204503361907-hc43d67rec9o4ucjs1lq49gd14nc8ols.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

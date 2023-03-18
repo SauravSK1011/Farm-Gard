@@ -1,0 +1,5 @@
+0 Cassava__bacterial_blight
+1 Cassava__brown_streak
+2 Cassava__green_mottle
+3 Cassava__healthy
+4 Cassava__mosaic_disease

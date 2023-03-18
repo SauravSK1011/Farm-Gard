@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:geocoding/geocoding.dart';
 
 import 'package:agroscan/Screens/prediction.dart';
 import 'package:flutter/material.dart';
@@ -34,25 +35,38 @@ class _HomeState extends State<Home> {
     data1 = await firebaseefunc.getdata();
     pdata = data1[0];
   }
+  String? _currentAddress1;
 
+  bool load1 = false;
+ Future<void> _getAddressFromLatLng(Position position) async {
+    await placemarkFromCoordinates(
+            _currentPosition!.latitude, _currentPosition!.longitude)
+        .then((List<Placemark> placemarks) {
+      Placemark place = placemarks[0];
+      setState(() {
+        _currentAddress1 =
+            '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
+      });
+    }).catchError((e) {
+      debugPrint(e);
+    });
+  }
   void _getWeather() async {
     String url =
-        "https://www.metaweather.com/api/location/search/?lattlong=${_currentPosition.latitude},${_currentPosition.longitude}";
+        "https://api.openweathermap.org/data/2.5/weather?lat=${_currentPosition.latitude}&lon=${_currentPosition.longitude}&appid=55a2a3de9b3cdcac1093ea844488264d&units=metric";
     try {
       http.Response response = await http.get(Uri.parse(url));
-      List<dynamic> results = json.decode(response.body);
-      String woeid = results[0]["woeid"].toString();
-      url = "https://www.metaweather.com/api/location/$woeid/";
-      response = await http.get(Uri.parse(url));
       Map<String, dynamic> result = json.decode(response.body);
-      print('result is');
+      print("result");
       print(result);
 
       setState(() {
-        _city = result["title"];
-        _temperature = result["consolidated_weather"][0]["the_temp"];
-        _weatherCondition =
-            result["consolidated_weather"][0]["weather_state_name"];
+        _city = result["name"];
+        _temperature = result["main"]["temp"];
+        print(_temperature);
+        _weatherIcon = result["weather"][0]["icon"];
+        _weatherCondition = result["weather"][0]["main"];
+        load1 = true;
       });
     } catch (e) {
       setState(() {
@@ -63,20 +77,24 @@ class _HomeState extends State<Home> {
 
   void _getLocation() async {
     print('position is');
-       var permission = await Geolocator.requestPermission();
+    var permission = await Geolocator.requestPermission();
 
     try {
       Position position = await Geolocator.getCurrentPosition(
-          forceAndroidLocationManager: true,
+          // forceAndroidLocationManager: true,
           desiredAccuracy: LocationAccuracy.high);
-      print(position.altitude);
+          _getAddressFromLatLng(position);
+      print("position.longitude");
+      print(position.longitude);
+      print("position.latitude");
+      print(position.latitude);
 
       setState(() {
         _currentPosition = position;
       });
       _getWeather();
     } catch (e) {
-      print(e);
+      print("eeeor" + e.toString());
       setState(() {
         _error = e.toString();
       });
@@ -85,8 +103,9 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    getdata();
     super.initState();
+        getdata();
+
     _getLocation();
   }
 
@@ -110,13 +129,24 @@ class _HomeState extends State<Home> {
                       fontWeight: FontWeight.bold,
                       color: Colors.white),
                 ),
-                Text(
-                  _temperature.toString(),
-                  style: TextStyle(
-                      fontSize: 35,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
+                load1 == true
+                    ? Card(
+                        elevation: 50,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(40),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                           "Temperature: "+ _temperature.toString()+"°C",
+                            style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
+                          ),
+                        ),
+                      )
+                    : Text(""),
                 SizedBox(
                   height: 50,
                 ),
@@ -435,11 +465,10 @@ class _HomeState extends State<Home> {
                     ]),
                   ),
                 ),
-                
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Card(                  elevation: 50,
-
+                  child: Card(
+                    elevation: 50,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                       //set border radius more than 50% of height and width to make circle
@@ -502,8 +531,8 @@ class _HomeState extends State<Home> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Card(                  elevation: 50,
-
+                  child: Card(
+                    elevation: 50,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                       //set border radius more than 50% of height and width to make circle
@@ -546,20 +575,20 @@ class _HomeState extends State<Home> {
                                               height: 25,
                                             ),
                                             Text(
-                                                widget.lang == 'English'
-                                                    ? "Detail"
-                                                    : "तपशीलवार माहिती",
-                                                style: TextStyle(
-                                                    fontSize: 20,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
+                                              widget.lang == 'English'
+                                                  ? "Detail"
+                                                  : "तपशीलवार माहिती",
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
                                             Padding(
                                               padding:
                                                   const EdgeInsets.all(8.0),
                                               child: Text(
-                                             widget.lang == 'English'
-                                          ?    "Paramparagat Krishi Vikas Yojana (PKVY) is being implemented with a view to promote organic farming in the country.  This will improve soil health and organic matter content and increase net income of the farmer so as to realise premium prices. Under this scheme, an area of 5 lakh acre is targeted to be covered though 10,000 clusters of 50 acre each, from the year 2015-16 to 2017-18. So far 7208 clusters have been formed and remaining  clusters would be formed during 2017-18.":"देशात सेंद्रिय शेतीला चालना देण्याच्या उद्देशाने परमपरागत कृषी विकास योजना (PKVY) राबविण्यात येत आहे. यामुळे मातीचे आरोग्य आणि सेंद्रिय पदार्थांचे प्रमाण सुधारेल आणि शेतकऱ्याचे निव्वळ उत्पन्न वाढेल जेणेकरुन प्रिमियम किमती मिळतील. या योजनेंतर्गत, 2015-16 ते 2017-18 या कालावधीत प्रत्येकी 50 एकरच्या 10,000 क्लस्टर्समध्ये 5 लाख एकर क्षेत्र समाविष्ट करण्याचे उद्दिष्ट आहे. आतापर्यंत 7208 क्लस्टर्स तयार करण्यात आले असून उर्वरित क्लस्टर्स 2017-18 मध्ये तयार केले जातील.",
+                                                widget.lang == 'English'
+                                                    ? "Paramparagat Krishi Vikas Yojana (PKVY) is being implemented with a view to promote organic farming in the country.  This will improve soil health and organic matter content and increase net income of the farmer so as to realise premium prices. Under this scheme, an area of 5 lakh acre is targeted to be covered though 10,000 clusters of 50 acre each, from the year 2015-16 to 2017-18. So far 7208 clusters have been formed and remaining  clusters would be formed during 2017-18."
+                                                    : "देशात सेंद्रिय शेतीला चालना देण्याच्या उद्देशाने परमपरागत कृषी विकास योजना (PKVY) राबविण्यात येत आहे. यामुळे मातीचे आरोग्य आणि सेंद्रिय पदार्थांचे प्रमाण सुधारेल आणि शेतकऱ्याचे निव्वळ उत्पन्न वाढेल जेणेकरुन प्रिमियम किमती मिळतील. या योजनेंतर्गत, 2015-16 ते 2017-18 या कालावधीत प्रत्येकी 50 एकरच्या 10,000 क्लस्टर्समध्ये 5 लाख एकर क्षेत्र समाविष्ट करण्याचे उद्दिष्ट आहे. आतापर्यंत 7208 क्लस्टर्स तयार करण्यात आले असून उर्वरित क्लस्टर्स 2017-18 मध्ये तयार केले जातील.",
                                                 style: TextStyle(
                                                   fontSize: 15,
                                                 ),
@@ -582,9 +611,9 @@ class _HomeState extends State<Home> {
                                       });
                                 },
                                 child: Card(
-                                    child: Text(
-                                       widget.lang == 'English'
-                                          ?  " Paramparagat Krishi Vikas Yojana  (PKVY)":"पारंपारिक कृषी विकास योजना")),
+                                    child: Text(widget.lang == 'English'
+                                        ? " Paramparagat Krishi Vikas Yojana  (PKVY)"
+                                        : "पारंपारिक कृषी विकास योजना")),
                               )
                             ],
                           )),
@@ -603,40 +632,41 @@ class _HomeState extends State<Home> {
                                               height: 25,
                                             ),
                                             Text(
-                                                widget.lang == 'English'
-                                                    ? "Detail"
-                                                    : "तपशीलवार माहिती",
-                                                style: TextStyle(
-                                                    fontSize: 20,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
+                                              widget.lang == 'English'
+                                                  ? "Detail"
+                                                  : "तपशीलवार माहिती",
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
                                             Padding(
                                               padding:
                                                   const EdgeInsets.all(8.0),
                                               child: Text(
-                                               widget.lang == 'English'
-                                          ?  "Launched in 2015, the scheme has been introduced to assist State Governments to issue Soil Health Cards to all farmers in the country.  The Soil Health Cards provide information to farmers on nutrient status of their soil alongwith recommendation on appropriate dosage of nutrients to be applied for improving soil health and its fertility. As on 11.7.2017, against target of 253 lakh soil samples, all 253 lakh soil samples have been collected and 245 lakh (97%) samples have been tested.  Against target of 12 crore Soil Health Cards, so far 9 crore (76%) cards have been distributed to farmers.":"2015 मध्ये सुरू करण्यात आलेली, ही योजना देशातील सर्व शेतकऱ्यांना मृदा आरोग्य कार्ड जारी करण्यासाठी राज्य सरकारांना मदत करण्यासाठी सुरू करण्यात आली आहे. मृदा आरोग्य कार्ड्स शेतकऱ्यांना त्यांच्या मातीच्या पोषक स्थितीबद्दल माहिती देतात आणि जमिनीचे आरोग्य आणि त्याची सुपीकता सुधारण्यासाठी पोषक तत्वांच्या योग्य डोसची शिफारस करतात. 11.7.2017 पर्यंत, 253 लाख माती नमुन्यांचे उद्दिष्ट असताना, सर्व 253 लाख मातीचे नमुने गोळा केले गेले आहेत आणि 245 लाख (97%) नमुने तपासण्यात आले आहेत. 12 कोटी मृदा आरोग्य कार्डांच्या उद्दिष्टासमोर आतापर्यंत 9 कोटी (76%) कार्ड शेतकऱ्यांना वितरित करण्यात आले आहेत.",
+                                                widget.lang == 'English'
+                                                    ? "Launched in 2015, the scheme has been introduced to assist State Governments to issue Soil Health Cards to all farmers in the country.  The Soil Health Cards provide information to farmers on nutrient status of their soil alongwith recommendation on appropriate dosage of nutrients to be applied for improving soil health and its fertility. As on 11.7.2017, against target of 253 lakh soil samples, all 253 lakh soil samples have been collected and 245 lakh (97%) samples have been tested.  Against target of 12 crore Soil Health Cards, so far 9 crore (76%) cards have been distributed to farmers."
+                                                    : "2015 मध्ये सुरू करण्यात आलेली, ही योजना देशातील सर्व शेतकऱ्यांना मृदा आरोग्य कार्ड जारी करण्यासाठी राज्य सरकारांना मदत करण्यासाठी सुरू करण्यात आली आहे. मृदा आरोग्य कार्ड्स शेतकऱ्यांना त्यांच्या मातीच्या पोषक स्थितीबद्दल माहिती देतात आणि जमिनीचे आरोग्य आणि त्याची सुपीकता सुधारण्यासाठी पोषक तत्वांच्या योग्य डोसची शिफारस करतात. 11.7.2017 पर्यंत, 253 लाख माती नमुन्यांचे उद्दिष्ट असताना, सर्व 253 लाख मातीचे नमुने गोळा केले गेले आहेत आणि 245 लाख (97%) नमुने तपासण्यात आले आहेत. 12 कोटी मृदा आरोग्य कार्डांच्या उद्दिष्टासमोर आतापर्यंत 9 कोटी (76%) कार्ड शेतकऱ्यांना वितरित करण्यात आले आहेत.",
                                                 style: TextStyle(
                                                   fontSize: 15,
                                                 ),
                                               ),
                                             ),
                                             ElevatedButton(
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              Search(
-                                                                url:
-                                                                    'https://soilhealth.dac.gov.in/home',
-                                                              )));
-                                                },
-                                                child: Text(
-                                                      widget.lang == 'English'
-                                                          ? "More Info"
-                                                          : "अधिक माहिती"),)
+                                              onPressed: () {
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            Search(
+                                                              url:
+                                                                  'https://soilhealth.dac.gov.in/home',
+                                                            )));
+                                              },
+                                              child: Text(
+                                                  widget.lang == 'English'
+                                                      ? "More Info"
+                                                      : "अधिक माहिती"),
+                                            )
                                           ],
                                         );
                                       });
